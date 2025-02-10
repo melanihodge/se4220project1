@@ -40,13 +40,13 @@ DB_ENGINE = 'mysql'
 DB_NAME = 'mytestdb'
 SECGROUP_ID="sg-1f25617b"
 
-print "Connecting to RDS"
+print("Connecting to RDS")
 
 rds = boto3.client('rds', aws_access_key_id=AWS_KEY,
                             aws_secret_access_key=AWS_SECRET,
                             region_name=REGION)
 
-print "Creating an RDS instance"
+print("Creating an RDS instance")
 
 response = rds.create_db_instance(DBName=DB_NAME, 
             DBInstanceIdentifier=ID, 
@@ -60,8 +60,8 @@ response = rds.create_db_instance(DBName=DB_NAME,
             ],
             Port=DB_PORT)
     
-print response
-print "Waiting for instance to be up and running"
+print(response)
+print("Waiting for instance to be up and running")
 sleep(30)
 response = rds.describe_db_instances(DBInstanceIdentifier=ID)
 status = response['DBInstances'][0]['DBInstanceStatus']
@@ -70,20 +70,20 @@ while not status == 'available':
     sleep(10)
     response = rds.describe_db_instances(DBInstanceIdentifier=ID)
     status = response['DBInstances'][0]['DBInstanceStatus']
-    print "Status: "+str(status)
+    print("Status: "+str(status))
 
 if status == 'available':
     response = rds.describe_db_instances(DBInstanceIdentifier=ID)
-    print "\nRDS Instance is now running. Instance details are:"
-    print "Intance ID: " + \
-        str(response['DBInstances'][0]['DBInstanceIdentifier'])
-    print "Intance State: " + \
-        str(response['DBInstances'][0]['DBInstanceStatus'])
-    print "Instance Type: " + \
-        str(response['DBInstances'][0]['DBInstanceClass'])
-    print "Engine: " + str(response['DBInstances'][0]['Engine'])
-    print "Allocated Storage: " + \
-    str(response['DBInstances'][0]['AllocatedStorage'])
-    print "Endpoint: " + str(response['DBInstances'][0]['Endpoint'])
+    print("\nRDS Instance is now running. Instance details are:")
+    print("Intance ID: " + \
+        str(response['DBInstances'][0]['DBInstanceIdentifier']))
+    print("Intance State: " + \
+        str(response['DBInstances'][0]['DBInstanceStatus']))
+    print("Instance Type: " + \
+        str(response['DBInstances'][0]['DBInstanceClass']))
+    print("Engine: " + str(response['DBInstances'][0]['Engine']))
+    print("Allocated Storage: " + \
+    str(response['DBInstances'][0]['AllocatedStorage']))
+    print("Endpoint: " + str(response['DBInstances'][0]['Endpoint']))
 
 

@@ -79,7 +79,7 @@ def s3uploading(filename, filenameWithPath):
                        
     bucket = BUCKET_NAME
     path_filename = "photos/" + filename
-    print path_filename
+    print(path_filename)
     s3.upload_file(filenameWithPath, bucket, path_filename)  
     s3.put_object_acl(ACL='public-read', 
                 Bucket=bucket, Key=path_filename)
@@ -109,7 +109,7 @@ def home_page():
         photo['URL'] = item[5]
         items.append(photo)
     conn.close()        
-    print items
+    print(items)
     return render_template('index.html', photos=items)
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -121,15 +121,15 @@ def add_photo():
         tags = request.form['tags']
         description = request.form['description']
 
-        print title,tags,description
+        print(title,tags,description)
         if file and allowed_file(file.filename):
             filename = file.filename
             filenameWithPath = os.path.join(UPLOAD_FOLDER, filename)
-            print filenameWithPath
+            print(filenameWithPath)
             file.save(filenameWithPath)            
             uploadedFileURL = s3uploading(filename, filenameWithPath);
             ExifData=getExifData(filenameWithPath)
-            print ExifData
+            print(ExifData)
             ts=time.time()
             timestamp = datetime.datetime.\
                         fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
@@ -151,7 +151,7 @@ def add_photo():
                         uploadedFileURL+"', '"+\
                         json.dumps(ExifData)+"');"
             
-            print statement
+            print(statement)
             result = cursor.execute(statement)
             conn.commit()
             conn.close()
@@ -224,7 +224,7 @@ def search_page():
         photo['ExifData']=item[6]
         items.append(photo)
     conn.close()        
-    print items
+    print(items)
     return render_template('search.html', photos=items, 
                             searchquery=query)
 

@@ -28,7 +28,7 @@ USERNAME = 'root'
 PASSWORD = 'password'
 DB_NAME = 'mytestdb'
 
-print "Connecting to RDS instance"
+print("Connecting to RDS instance")
 
 conn = MySQLdb.connect (host = "<enter>",
                         user = USERNAME,
@@ -36,12 +36,12 @@ conn = MySQLdb.connect (host = "<enter>",
                         db = DB_NAME, 
 			port = 3306)
 
-print "Connected to RDS instance"
+print("Connected to RDS instance")
 
 cursor = conn.cursor ()
 cursor.execute ("SELECT VERSION()")
 row = cursor.fetchone ()
-print "server version:", row[0]
+print("server version:", row[0])
 
 cursor.execute ("CREATE TABLE \
     Student(Id INT PRIMARY KEY, Name TEXT, Major TEXT, Grade FLOAT) ")
@@ -55,7 +55,7 @@ cursor.execute("SELECT * FROM Student")
 rows = cursor.fetchall()
 
 for row in rows:
-	print row
+	print(row)
 
 cursor.close ()
 conn.close ()
