@@ -22,21 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+import pymysql
+pymysql.install_as_MySQLdb()
 import MySQLdb
 DB_USERNAME = 'root'
 DB_PASSWORD = 'password'
 DB_NAME = 'photogallerydb'
 
-conn = MySQLdb.connect(host = "dbendpoint.us-east-1.rds.amazonaws.com",
-                        user = DB_USERNAME,
-                        passwd = DB_PASSWORD,
-                        db = DB_NAME, 
-                        port = 3306)
+conn = MySQLdb.connect(host = "photo-gallery-db.cno44c8aw2h6.us-east-2.rds.amazonaws.com",                        user = "admin",
+                       passwd = "SE422p1$",
+                       db = "photogallerydb",
+                       port = 3306)
 
 cursor = conn.cursor ()
-cursor.execute ("SELECT VERSION()")
+cursor.execute("SELECT VERSION()")
 
-cursor.execute ("CREATE TABLE photogallery2 ( \
+cursor.execute("CREATE TABLE photogallery2 ( \
     PhotoID int PRIMARY KEY NOT NULL AUTO_INCREMENT, \
     CreationTime TEXT NOT NULL, \
     Title TEXT NOT NULL, \
@@ -46,5 +47,5 @@ cursor.execute ("CREATE TABLE photogallery2 ( \
     EXIF TEXT NOT NULL\
     );")
 
-cursor.close ()
-conn.close ()
+cursor.close()
+conn.close()
