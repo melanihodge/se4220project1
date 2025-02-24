@@ -23,16 +23,18 @@ SOFTWARE.
 '''
 
 #!flask/bin/python
-from flask import Flask, jsonify, abort, request, make_response, url_for
-from flask import render_template, redirect
+from flask import Flask, jsonify, abort, request, make_response, url_for, render_template, redirect, Response
+from urllib.parse import quote
 import os
-import boto3    
 import time
 import datetime
-from boto3.dynamodb.conditions import Key, Attr
 import exifread
 import json
-
+import boto3
+import pymysql
+import requests
+pymysql.install_as_MySQLdb()
+import MySQLdb
 app = Flask(__name__, static_url_path="")
 
 UPLOAD_FOLDER = os.path.join(app.root_path,'media')
@@ -90,6 +92,36 @@ def s3uploading(filename, filenameWithPath):
         ".s3-website-us-east-1.amazonaws.com/"+ path_filename  
 
 @app.route('/', methods=['GET', 'POST'])
+def login():
+    # Hardcoded credentials for testing
+    HARDCODED_USERNAME = "Se422"
+    HARDCODED_PASSWORD = "aws123"
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == HARDCODED_USERNAME and password == HARDCODED_PASSWORD:
+            # Successful login
+            conn = MySQLdb.connect(host=DB_HOSTNAME, user=DB_USERNAME, passwd=DB_PASSWORD, db=DB_NAME, port=3306)
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT * FROM photogallerydb.photogallery2;")
+            results = cursor.fetchall()
+
+            items = [{"PhotoID": item[0], "CreationTime": item[1], "Title": item[2], "Description": item[3], "Tags": item[4], "URL": item[5]} for item in results]
+
+            conn.close()
+            print(items)
+            return render_template('home.html', photos=items)
+        else:
+            # Invalid credentials
+            return render_template('index.html', error="Invalid username or password")
+    else:
+        # Render login page for GET requests
+        return render_template('index.html')
+
+@app.route('/home', methods=['GET', 'POST'])
 def home_page():
     response = table.scan()
 
@@ -165,6 +197,26 @@ def search_page():
     items = response['Items']
     return render_template('search.html', 
             photos=items, searchquery=query)
+
+@app.route('/download/<path:image_name>')
+def download_image(image_name):
+        image_url = f"https://{BUCKET_NAME}.s3.us-east-2.amazonaws.com/photos/{image_name}"
+
+        response = requests.get(image_url, stream = True)
+
+        # Sucess
+        if response.status_code == 200:
+                def generate():
+                        for chunk in response.iter_content(chunk_size = 4096):
+                                yield chunk
+                encoded_filename = quote(image_name)
+
+                return Response(generate(), headers = {
+                        "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}",
+                        "Content-Type": response.headers['Content-Type']
+                })
+        else:
+                return "Error failed to download", response.status_code
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5001)
