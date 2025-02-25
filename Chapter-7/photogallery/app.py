@@ -39,10 +39,10 @@ app = Flask(__name__, static_url_path="")
 
 UPLOAD_FOLDER = os.path.join(app.root_path,'media')
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-AWS_ACCESS_KEY="<enter>"
-AWS_SECRET_KEY="<enter>+0vqOmhI3ObEtIvQ+jmAkh/"
+AWS_ACCESS_KEY=os.getenv("AWS_ACCESS_KEY")
+AWS_SECRET_KEY=os.getenv("AWS_SECRET_KEY")
 REGION="us-east-1"
-BUCKET_NAME="<enter>"
+BUCKET_NAME="photogallery-bucket-422"
 
 dynamodb = boto3.resource('dynamodb', aws_access_key_id=AWS_ACCESS_KEY,
                             aws_secret_access_key=AWS_SECRET_KEY,
@@ -81,15 +81,15 @@ def getExifData(path_name):
 def s3uploading(filename, filenameWithPath):
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY,
                             aws_secret_access_key=AWS_SECRET_KEY)
-                       
+
     bucket = BUCKET_NAME
     path_filename = "photos/" + filename
     print path_filename
-    s3.upload_file(filenameWithPath, bucket, path_filename)  
-    s3.put_object_acl(ACL='public-read', 
+    s3.upload_file(filenameWithPath, bucket, path_filename)
+    s3.put_object_acl(ACL='public-read',
                 Bucket=bucket, Key=path_filename)
     return "http://"+BUCKET_NAME+\
-        ".s3-website-us-east-1.amazonaws.com/"+ path_filename  
+        ".s3-website-us-east-1.amazonaws.com/"+ path_filename
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -132,7 +132,7 @@ def home_page():
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_photo():
-    if request.method == 'POST':    
+    if request.method == 'POST':
         uploadedFileURL=''
 
         file = request.files['imagefile']
@@ -143,11 +143,11 @@ def add_photo():
         print title,tags,description
         if file and allowed_file(file.filename):
             filename = file.filename
-            filenameWithPath = os.path.join(UPLOAD_FOLDER, 
+            filenameWithPath = os.path.join(UPLOAD_FOLDER,
                                         filename)
             print filenameWithPath
             file.save(filenameWithPath)
-            uploadedFileURL = s3uploading(filename, 
+            uploadedFileURL = s3uploading(filename,
                                         filenameWithPath);
             ExifData=getExifData(filenameWithPath)
             ts=time.time()
@@ -219,4 +219,4 @@ def download_image(image_name):
                 return "Error failed to download", response.status_code
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True, host="0.0.0.0", port=8080)
